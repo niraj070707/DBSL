@@ -1,0 +1,90 @@
+create table Borrowers(
+	Roll_no Int,
+	Name varchar(20),
+	Date_of_Issue Date,
+	Name_of_Book varchar(20),
+ 	Status char(10),
+	Primary key(Roll_no)
+);
+
+create table Fine(
+	Roll_no Int,
+	Amt Int,
+	Date_of_fine Date,
+	foreign key(Roll_no) references Borrowers(Roll_no)
+);
+
+
+Insert into Borrowers(Roll_no,Name,Date_of_Issue,Name_of_Book,Status) values 
+	( 1, "Russi" , "2023-10-31",'b1' , 'I' ) ,
+	( 2 , 'p2' , '2023-10-17' , 'b2' , 'I' ) , 
+	( 3 , 'p2' , '2023-10-18' , 'b3' , 'I' ) , 
+	( 4 , 'p2' , '2023-10-16' , 'b1' , 'I' ) , 
+	( 5 , 'p2' , '2023-10-01' , 'b2' , 'I' ) , 
+	( 6 , 'p2' , '2023-10-10' , 'b3' , 'I' ) ; 
+	
+drop procedure Calc_fine;
+Delimiter //
+
+Create procedure Calc_fine( in Roll_no int)
+Begin
+Declare fine int;
+Declare issued_date date;
+Declare error int;
+Declare days int;
+declare exit handler for 1452 select 'Invalid Roll_no';
+
+select Borrowers.Date_of_issue into issued_date from Borrowers where Borrowers.Roll_no = Roll_no;
+
+set days = datediff(CURDATE(), issued_date);
+
+if days < 30 and days >15 then
+	set fine = 5*days;
+else 
+	set fine = 30*days;
+end if;
+
+
+	
+insert into Fine ( Roll_no, Amt, Date_of_fine) values (Roll_no, fine, curdate());
+select 'entry inserted successfully';
+
+
+end;
+//
+Delimiter ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
