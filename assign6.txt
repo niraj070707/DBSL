@@ -1,0 +1,56 @@
+create table books(
+	id		int			auto_increment		                ,
+	name	varchar(20)	not null	    unique	            ,
+	price	int			not null	    check( price > 0 )  ,
+	primary key( id )
+);
+
+create table audit(
+	id int not null,
+	name varchar(20) not null,
+	price int not null,
+        ts datetime default current_timestamp()
+);
+
+insert into books( name , price ) values
+( 'DBMS' , 1000 ) , 
+( 'SPOS' , 6000 ) , 
+( 'CN' , 5000 ) , 
+( 'DS' , 2000 ) , 
+( 'TOC' , 3000 ) ;
+
+
+create trigger trigger_book_update
+before update on books
+for each row 
+insert into audit (id, name, price) values (old.id, old.name, old.price);
+
+
+create trigger trigger_book_delete
+before delete on books
+for each row 
+insert into audit (id, name, price) values (old.id, old.name, old.price);
+
+DROP TRIGGER trigger_before_insert;
+delimiter //
+create trigger Trigger_before_insert
+before insert on books
+for each row 
+begin
+
+Declare Invalid_insert condition for sqlstate '45000';
+Declare message_text varchar(20);
+Declare continue handler for Invalid_insert resignal set message_text='!!invalid!!';
+
+if(New.id < 0) then 
+	signal Invalid_insert;
+end if;
+end;
+//
+delimiter ;
+
+create trigger trigger_book_update
+before update on books
+for each row 
+insert into audit (id, name, price) values (old.id, old.name, old.price);
+

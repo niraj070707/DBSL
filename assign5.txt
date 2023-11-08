@@ -1,0 +1,62 @@
+
+create table Stud_marks(roll_no int auto_increment primary key , Name varchar(20), Marks int);
+
+insert into Stud_marks( Name , Marks) values
+( 'p1' , 1000 ) , 
+( 'p2' , 945 ) , 
+( 'p3' , 830 ) , 
+( 'p4' , 960 ) , 
+( 'p5' , 1200 ) ; 
+
+
+create table Result(
+	roll_no int , 
+	Name varchar(20), 
+	Category varchar(20),
+	foreign key(roll_no) references Stud_marks(roll_no) on delete cascade
+);
+
+Drop function proc_Grade;
+Delimiter //
+
+create function proc_Grade(roll_no int)
+returns varchar(20)
+deterministic
+Begin
+Declare category varchar(20);
+Declare marks int;
+Declare Name varchar(20);
+
+select Stud_marks.Name into Name from Stud_marks where Stud_marks.roll_no = roll_no;
+select Stud_marks.Marks into marks from Stud_marks where Stud_marks.roll_no = roll_no;
+
+if marks < 1501 and marks > 989 then 
+	set category = "Distinction";
+elseif marks < 990 and marks > 899 then
+	set category = "First Class";
+else 
+	set category = "Higher Second Class";
+end if;
+return category;
+end;
+//
+delimiter ;
+
+drop procedure Result;
+Delimiter //
+
+create procedure Result(in roll_no int)
+Begin
+Declare category varchar(20);
+Declare Name varchar(20);
+
+Declare exit handler for 1452 select "Invalid Roll_no";
+select Stud_marks.Name into Name from Stud_marks where Stud_marks.roll_no = roll_no;
+
+set category = proc_Grade(roll_no);
+
+insert into Result(roll_no, Name , Category) values (roll_no, Name, category);
+
+end;
+//
+delimiter ;

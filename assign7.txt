@@ -1,0 +1,53 @@
+create table new_emp(
+	emp_id INT,
+	emp_name VARCHAR(20),
+	emp_dept VARCHAR(10),
+	emp_salary INT,
+	primary key( emp_id )
+);
+
+create table old_emp(
+	emp_id INT,
+	emp_name VARCHAR(20),
+	emp_dept VARCHAR(10),
+	emp_salary INT,
+	primary key( emp_id )
+);
+
+insert into old_emp values
+( 1 , 'p1' , 'Sales' , 10000 ) ,
+( 2 , 'p2' , 'Dev' , 20000 ) ,
+( 3 , 'p3' , 'Testing' , 50000 ) ,
+( 4 , 'p4' , 'Sales' , 10000 ) ,
+( 5 , 'p5' , 'Marketing' , 50000 ) ,
+( 6 , 'p6' , 'Sales' , 9000 ) ,
+( 7 , 'p7' , 'Accounts' , 10000 ) ,
+( 8 , 'p8' , 'Sales' , 7000 ) ; 
+
+
+drop procedure copy_data;
+delimiter //
+
+create procedure copy_data()
+begin
+
+declare empid int;
+declare exit_value Boolean default 0;
+declare curr cursor for select old_emp.emp_id from old_emp;
+declare  continue handler for not found set  exit_value = 1;
+declare  continue handler for 1062 select "Already present";
+open curr;
+
+
+Loop_start : loop
+	fetch curr into empid;
+	insert into new_emp select * from old_emp where old_emp.emp_id = empid;
+	if(exit_value) then 
+		close curr;
+		leave loop_start;
+	end if;
+end loop loop_start;
+
+end;
+//
+delimiter ;
